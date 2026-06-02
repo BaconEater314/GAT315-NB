@@ -35,11 +35,6 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "gui_physics.h"
 #pragma warning ( pop )
 
-//SetTargetFPS(10);
-
-//World world;
-//world.AddEffector(new PointEffector(Vector2{200,200}
-
 GuiPhysicsState state;
 
 void AddBody(World& world, WorldCamera& camera);
@@ -69,8 +64,7 @@ int main ()
 	Body* selectedBody = nullptr;
 	Body* connectedBody = nullptr;
 
-	// Load a texture from the resources directory
-	//Texture wabbit = LoadTexture("wabbit_alpha.png");
+	// set up simulate and time accumulation
 	float timeAccum = 0.0f;
 	bool simulate = true;
 
@@ -112,7 +106,7 @@ int main ()
 					Vector2 position = world_camera.ScreenToWorld(GetMousePosition());
 					if (IsKeyDown(KEY_LEFT_CONTROL))
 					{
-						Vector2 force = Spring::GetSpringForce(position, selectedBody->position, 1.0f, 3.0f);
+						Vector2 force = Spring::GetSpringForce(position, selectedBody->position, state.SpringLengthValue, state.SpringStiffnessValue * state.SpringMultiplierValue);
 						selectedBody->AddForce(force);
 					}
 					else
@@ -145,37 +139,6 @@ int main ()
 				timeAccum -= fixedTimeStep;
 			}
 		}
-
-		/*
-		if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
-		{
-			Vector2 position = GetMousePosition();
-			for (auto& body : bodies)
-			{
-				Vector2 direction = position - body.position;
-				if (Vector2Length(direction) <= 100.0f)
-				{
-					Vector2 force = Vector2Normalize(direction) * -10000.0f;
-					//AddForce(body, force);
-				}
-			}
-			DrawCircleLinesV(position, 100, WHITE);
-		}
-		*/
-		//if (IsKeyDown(KEY_SPACE)) 
-		//{
-		//	Vector2 position = GetMousePosition();
-		//	for (auto& body : bodies)
-		//	{
-		//		Vector2 direction = position + body.position;
-		//		if (Vector2Length(direction) <= 100.0f)
-		//		{
-		//			Vector2 force = Vector2Normalize(direction) * 10000.0f;
-		//			//body.AddForce(force, Body::ForceType);
-		//		}
-		//	}
-		//	DrawCircleLinesV(position, 100, WHITE);
-		//}
 		
 		// DRAW
 		BeginDrawing();
@@ -185,9 +148,6 @@ int main ()
 
 		// draw some text using the default font
 		std::string fpsText = "FPS: " + std::to_string(GetFPS());
-		//fpsText += GetFPS();
-		DrawText(fpsText.c_str(), GetScreenWidth() - 120, 80, 20, WHITE);
-
 
 		world_camera.Begin();
 
@@ -198,16 +158,7 @@ int main ()
 
 
 		GuiPhysics(&state);
-
-		//world_camera.Begin();
-		//world.Draw();
-		//DrawCircleLinesV(world_camera.ScreenToWorld(GetMousePosition()), state.BodySizeValue, WHITE);
-		DrawCircleLinesV(GetMousePosition(), state.BodySizeValue, WHITE);
-
-		//if (selectedBody) DrawCircleLinesV();
-
-		// draw our texture to the screen
-		//DrawTexture(wabbit, 400, 200, WHITE);
+		DrawText(fpsText.c_str(), GetScreenWidth() - 120, 80, 20, WHITE);
 		
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
@@ -242,7 +193,6 @@ void AddBody(World& world, WorldCamera& camera)
 	body.inverseMass = (body.bodyType == BodyType::Static) ? 0 : 1.0f / body.mass;
 	body.gravityScale = state.BodyGravityValue;
 	body.damping = state.BodyDampingValue; // <- lowered damping so bodies would move
-	//body.velocity = direction * 100.0f; // <- set initial velocity
 
 	world.AddBody(body);
 }
